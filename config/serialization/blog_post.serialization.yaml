@@ -1,0 +1,45 @@
+# config/serialization/blog_post.serialization.yaml
+App\Entity\BlogPost:
+    attributes:
+        id:
+            groups: ['BlogPostCollection:read']
+        blogPostId:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        blogCategory:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        title:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        content:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        remarks:
+            groups: ['BlogPost:transition']
+        status:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        slug:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        tags:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        featured:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update', 'BlogPost:write']
+        createdAt:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        createdBy:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        updatedAt:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        updatedBy:
+            groups: ['BlogPost:read', 'BlogPostCollection:read', 'BlogPost:update']
+        author:
+            groups: ['BlogPost:read']
+        blogPostComments:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        blogPostImages:
+            groups: ['BlogPost:read', 'BlogPostCollection:read']
+        annualBlogPostsAuthorsReport:
+            groups: ['BlogPostReportsAnnualAuthors:read']
+        annualBlogPostsCategoriesReport:
+            groups: ['BlogPostReportsAnnualCategories:read']
+        monthlyBlogPostsAuthorsReport:
+            groups: ['BlogPostReportsMonthlyAuthors:read']
+        monthlyBlogPostsCategoriesReport:
+            groups: ['BlogPostReportsMonthlyCategories:read']

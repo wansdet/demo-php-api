@@ -1,0 +1,9 @@
+# config/serialization/document.serialization.yaml
+App\Entity\Document:
+    attributes:
+        id:
+            groups: ['DocumentCollection:read']
+        filename:
+            groups: ['DocumentCollection:read']
+        createdAt:
+            groups: ['DocumentCollection:read']

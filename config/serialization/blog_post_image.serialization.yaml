@@ -1,0 +1,23 @@
+# config/serialization/blog_post_image.serialization.yaml
+App\Entity\BlogPostImage:
+    attributes:
+        id:
+            groups: ['BlogPostImageCollection:read']
+        blogImageId:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']
+        image:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read', 'BlogPostImage:update', 'BlogPostImage:write']
+        status:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read', 'BlogPostImage:update', 'BlogPostImage:write']
+        createdAt:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']
+        createdBy:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']
+        updatedAt:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']
+        updatedBy:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read', 'BlogPostImage:update']
+        blog:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']
+        user:
+            groups: ['BlogPostImage:read', 'BlogPostImageCollection:read']

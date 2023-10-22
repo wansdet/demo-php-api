@@ -1,0 +1,45 @@
+# config/serialization/user.serialization.yaml
+App\Entity\User:
+    attributes:
+        id:
+            groups: ['UserCollection:read']
+        userId:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'BlogPost:read']
+        email:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'User:update', 'User:write']
+        firstName:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'User:update', 'UserAccount:update', 'User:write', 'BlogPost:read']
+        lastName:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'User:update', 'UserAccount:update', 'User:write', 'BlogPost:read']
+        middleName:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'User:update', 'UserAccount:update', 'User:write']
+        displayName:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'User:update', 'User:write']
+        password:
+            groups: ['User:update', 'UserAccount:update', 'User:write']
+        remarks:
+            groups: ['User:transition']
+        roles:
+            groups: ['User:read', 'UserCollection:read', 'User:update']
+        sex:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'User:update', 'UserAccount:update', 'User:write', 'BlogPost:read']
+        dob:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'User:update', 'UserAccount:update', 'User:write']
+        jobTitle:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'User:update', 'UserAccount:update', 'User:write', 'BlogPost:read']
+        status:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'User:update']
+        description:
+            groups: ['User:read', 'UserAccount:read', 'UserCollection:read', 'UserPublic:read', 'User:update', 'UserAccount:update', 'User:write', 'BlogPost:read']
+        createdAt:
+            groups: ['User:read', 'UserCollection:read']
+        createdBy:
+            groups: ['User:read', 'UserCollection:read']
+        updatedAt:
+            groups: [ 'User:read', 'UserCollection:read']
+        updatedBy:
+            groups: ['User:read', 'UserCollection:read', 'User:update', 'UserAccount:update']
+        currentPassword:
+            groups: ['UserPassword:update']
+        newPassword:
+            groups: ['UserPassword:update']

@@ -1,0 +1,11 @@
+parameters:
+    level: 6
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/
+    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - '#Return type of call to method PHPUnit\\Framework\\TestCase::createMock\(\) contains unresolvable type#'

@@ -1,0 +1,18 @@
+# config/filter/blog_post.filter.yaml
+services:
+    blog_post.search_filter:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments: [{ blogCategory: 'exact', createdBy: 'exact', featured: 'exact', status: 'exact' }]
+        tags:  [ 'api_platform.filter' ]
+    blog_post.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments: [{ id: 'DESC' }]
+        tags: ['api_platform.filter']
+    blog_post.exists_filter:
+        parent: 'api_platform.doctrine.orm.exists_filter'
+        arguments: [ { featured: ~ } ]
+        tags:  [ 'api_platform.filter' ]
+    blog_post.date_filter:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments: [ { createdAt: exclude_null } ]
+        tags:  [ 'api_platform.filter' ]

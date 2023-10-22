@@ -1,0 +1,10 @@
+# config/filter/country.filter.yaml
+services:
+    country.search_filter:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments: [{ countryName: partial, region.regionCode: exact }]
+        tags: ['api_platform.filter']
+    country.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments: [{ countryCode: 'ASC', countryName: 'ASC', region.regionName: 'ASC', sortOrder: 'ASC' }]
+        tags: ['api_platform.filter']

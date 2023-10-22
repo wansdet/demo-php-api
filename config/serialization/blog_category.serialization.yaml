@@ -1,0 +1,21 @@
+# config/serialization/blog_category.serialization.yaml
+App\Entity\BlogCategory:
+    attributes:
+        blogCategoryCode:
+            groups: ['BlogCategory:read', 'BlogCategoryCollection:read', 'BlogCategory:write', 'BlogPost:read', 'BlogPostCollection:read']
+        blogCategoryName:
+            groups: ['BlogCategory:read', 'BlogCategoryCollection:read', 'BlogCategory:update' ,'BlogCategory:write', 'BlogPost:read', 'BlogPostCollection:read']
+        active:
+            groups: ['BlogCategory:read', 'BlogCategoryCollection:read', 'BlogCategory:update' ,'BlogCategory:write']
+        sortOrder:
+            groups: ['BlogCategory:read', 'BlogCategoryCollection:read', 'BlogCategory:update' ,'BlogCategory:write']
+        createdAt:
+            groups: ['BlogCategory:read']
+        createdBy:
+            groups: ['BlogCategory:read', 'BlogCategory:write']
+        updatedAt:
+            groups: ['BlogCategory:read']
+        updatedBy:
+            groups: ['BlogCategory:read', 'BlogCategory:update']
+        countries:
+            groups: ['BlogCategory:read']

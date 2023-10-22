@@ -1,0 +1,6 @@
+# config/filter/region.filter.yaml
+services:
+    region.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments: [{ regionCode: 'ASC', regionName: 'ASC', sortOrder: 'ASC' }]
+        tags: ['api_platform.filter']

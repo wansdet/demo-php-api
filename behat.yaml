@@ -1,0 +1,15 @@
+# behat.yaml
+default:
+    suites:
+        default:
+            contexts:
+                - App\Tests\Context\HydraApiContext
+                - App\Tests\Context\FeatureContext
+
+    extensions:
+        Imbo\BehatApiExtension:
+            apiClient:
+                base_uri: 'http://localhost:8000'
+                timeout: 10
+                verify: false
+

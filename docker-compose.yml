@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+###> symfony/mailer ###
+  mailer:
+    image: schickling/mailcatcher
+    ports: ["1025", "1080"]
+###< symfony/mailer ###
+
+###> redis ###
+  redis:
+    image: redis:alpine
+    ports: ["6379"]
+###< redis ###
+
+###> rabbitmq ###
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+###< rabbitmq ###

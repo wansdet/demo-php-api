@@ -1,0 +1,14 @@
+# config/filter/blog_post_comment.filter.yaml
+services:
+    blog_post_comment.search_filter:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments: [{ comment: 'partial', createdBy: 'exact', status: 'exact' }]
+        tags:  [ 'api_platform.filter' ]
+    blog_post_comment.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments: [{ id: 'DESC' }]
+        tags: ['api_platform.filter']
+    blog_post_comment.date_filter:
+        parent: 'api_platform.doctrine.orm.date_filter'
+        arguments: [ { createdAt: exclude_null } ]
+        tags:  [ 'api_platform.filter' ]

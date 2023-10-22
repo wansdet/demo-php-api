@@ -1,0 +1,21 @@
+# config/serialization/region.serialization.yaml
+App\Entity\Region:
+    attributes:
+        regionCode:
+            groups: ['Region:read', 'RegionCollection:read', 'Region:write']
+        regionName:
+            groups: ['Region:read', 'RegionCollection:read', 'Region:update' ,'Region:write']
+        active:
+            groups: ['Region:read', 'RegionCollection:read', 'Region:update' ,'Region:write']
+        sortOrder:
+            groups: ['Region:read', 'RegionCollection:read', 'Region:update' ,'Region:write']
+        createdAt:
+            groups: ['Region:read']
+        createdBy:
+            groups: ['Region:read', 'Region:write']
+        updatedAt:
+            groups: ['Region:read']
+        updatedBy:
+            groups: ['Region:read', 'Region:update']
+        countries:
+            groups: ['Region:read']

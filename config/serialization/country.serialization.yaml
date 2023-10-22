@@ -1,0 +1,21 @@
+# config/serialization/country.serialization.yaml
+App\Entity\Country:
+    attributes:
+        countryCode:
+            groups: ['Country:read', 'CountryCollection:read', 'Country:write', 'Region:read']
+        countryName:
+            groups: ['Country:read', 'CountryCollection:read', 'Country:update' ,'Country:write', 'Region:read']
+        active:
+            groups: ['Country:read', 'CountryCollection:read', 'Country:update' ,'Country:write']
+        sortOrder:
+            groups: ['Country:read', 'CountryCollection:read', 'Country:update' ,'Country:write', 'Region:read']
+        createdAt:
+            groups: ['Country:read']
+        createdBy:
+            groups: ['Country:read', 'Country:update' ,'Country:write']
+        updatedAt:
+            groups: ['Country:read']
+        updatedBy:
+            groups: ['Country:read', 'Country:update']
+        region:
+            groups: ['Country:read', 'Country:update' ,'Country:write']

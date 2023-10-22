@@ -1,0 +1,27 @@
+# config/serialization/blog_post_comment.serialization.yaml
+App\Entity\BlogPostComment:
+    attributes:
+        id:
+            groups: ['BlogPostCommentCollection:read']
+        blogPostCommentId:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPost:read']
+        comment:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPostComment:update', 'BlogPostComment:write', 'BlogPost:read']
+        status:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPostComment:update', 'BlogPostComment:write', 'BlogPost:read']
+        rating:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPostComment:update', 'BlogPostComment:write', 'BlogPost:read']
+        remarks:
+            groups: ['BlogPostComment:transition']
+        createdAt:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPost:read']
+        createdBy:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPost:read']
+        updatedAt:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read']
+        updatedBy:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPostComment:update']
+        blogPost:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read', 'BlogPostComment:write']
+        author:
+            groups: ['BlogPostComment:read', 'BlogPostCommentCollection:read']

@@ -1,0 +1,6 @@
+# config/filter/blog_category.filter.yaml
+services:
+    blog_category.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments: [{ blogCategoryCode: 'ASC', blogCategoryName: 'ASC', sortOrder: 'ASC' }]
+        tags: ['api_platform.filter']

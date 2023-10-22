@@ -1,0 +1,58 @@
+# config/packages/workflow.yaml
+framework:
+    workflows:
+        blog_publishing:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\BlogPost
+            initial_marking: !php/const App\Entity\BlogPost::STATUS_DRAFT
+            places:
+                - !php/const App\Entity\BlogPost::STATUS_DRAFT
+                - !php/const App\Entity\BlogPost::STATUS_REJECTED
+                - !php/const App\Entity\BlogPost::STATUS_SUBMITTED
+                - !php/const App\Entity\BlogPost::STATUS_PUBLISHED
+                - !php/const App\Entity\BlogPost::STATUS_ARCHIVED
+            transitions:
+                submit:
+                    guard: 'is_granted("ROLE_BLOGGER")'
+                    from:
+                        - !php/const App\Entity\BlogPost::STATUS_DRAFT
+                        - !php/const App\Entity\BlogPost::STATUS_REJECTED
+                    to:   !php/const App\Entity\BlogPost::STATUS_SUBMITTED
+                publish:
+                    guard: 'is_granted("ROLE_EDITOR")'
+                    from:
+                        - !php/const App\Entity\BlogPost::STATUS_SUBMITTED
+                        - !php/const App\Entity\BlogPost::STATUS_ARCHIVED
+                    to:   !php/const App\Entity\BlogPost::STATUS_PUBLISHED
+                reject:
+                    guard: 'is_granted("ROLE_EDITOR")'
+                    from: !php/const App\Entity\BlogPost::STATUS_SUBMITTED
+                    to:   !php/const App\Entity\BlogPost::STATUS_REJECTED
+                archive:
+                    guard: 'is_granted("ROLE_EDITOR")'
+                    from: !php/const App\Entity\BlogPost::STATUS_PUBLISHED
+                    to:   !php/const App\Entity\BlogPost::STATUS_ARCHIVED
+        blog_post_comment_publishing:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\BlogPostComment
+            initial_marking: !php/const App\Entity\BlogPostComment::STATUS_PUBLISHED
+            places:
+                - !php/const App\Entity\BlogPostComment::STATUS_PUBLISHED
+                - !php/const App\Entity\BlogPostComment::STATUS_REJECTED
+            transitions:
+                reject:
+                    guard: 'is_granted("ROLE_MODERATOR")'
+                    from: !php/const App\Entity\BlogPostComment::STATUS_PUBLISHED
+                    to:   !php/const App\Entity\BlogPostComment::STATUS_REJECTED

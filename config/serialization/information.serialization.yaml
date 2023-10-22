@@ -1,0 +1,27 @@
+# config/serialization/information.serialization.yaml
+App\Entity\Information:
+    attributes:
+        id:
+            groups: ['Information:read']
+        informationId:
+            groups: ['Information:read', 'InformationCollection:read']
+        subTitle:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        title:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        information:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        informationType:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        active:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        sortOrder:
+            groups: ['Information:read', 'InformationCollection:read', 'Information:update' ,'Information:write']
+        createdAt:
+            groups: ['Information:read']
+        createdBy:
+            groups: ['Information:read', 'Information:write']
+        updatedAt:
+            groups: ['Information:read']
+        updatedBy:
+            groups: ['Information:read', 'Information:update']
