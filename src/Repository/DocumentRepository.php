@@ -26,8 +26,8 @@ class DocumentRepository extends ServiceEntityRepository
 
     public function delete(Document $document): void
     {
-        $this->_em->remove($document);
-        $this->_em->flush();
+        $this->getEntityManager()->remove($document);
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -65,8 +65,8 @@ class DocumentRepository extends ServiceEntityRepository
 
     public function save(Document $document): void
     {
-        $this->_em->persist($document);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($document);
+        $this->getEntityManager()->flush();
     }
 
     //    /**

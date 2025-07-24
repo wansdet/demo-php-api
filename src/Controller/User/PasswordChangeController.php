@@ -9,9 +9,9 @@ use App\Service\User\PasswordChangeService;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 
 #[AsController]
-final class PasswordChangeController
+final readonly class PasswordChangeController
 {
-    public function __construct(private readonly PasswordChangeService $passwordChangeService)
+    public function __construct(private PasswordChangeService $passwordChangeService)
     {
     }
 

@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Writer\Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
@@ -26,6 +27,7 @@ final class BlogPostReportExportAdminHandler
 
     /**
      * @throws Exception
+     * @throws ExceptionInterface
      */
     public function __invoke(BlogPostReportExportAdmin $blogPostReportExportAdmin): void
     {

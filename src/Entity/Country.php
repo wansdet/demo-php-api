@@ -11,8 +11,9 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Repository\CountryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -38,15 +39,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             security: 'is_granted("ROLE_ADMIN")',
         ),
-        new Put(
-            normalizationContext: [
-                'groups' => ['Country:read'],
-            ],
-            denormalizationContext: [
-                'groups' => ['Country:update'],
-            ],
-            security: 'is_granted("ROLE_ADMIN")',
-        ),
         new Patch(
             normalizationContext: [
                 'groups' => ['Country:read'],
@@ -64,18 +56,16 @@ use Symfony\Component\Validator\Constraints as Assert;
         'country.search_filter',
         'country.order_filter',
     ],
-    order: ['sortOrder' => 'ASC'],
+    order: [
+        'sortOrder' => 'ASC',
+    ],
     paginationClientItemsPerPage: true,
 )]
-#[ORM\Entity(repositoryClass: CountryRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[ORM\Entity(repositoryClass: CountryRepository::class)]
 class Country implements AuthoredEntityInterface
 {
     use TimestampsTrait;
-
-    #[ORM\Column]
-    #[Assert\NotNull]
-    private ?bool $active = null;
 
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 2, nullable: false)]
@@ -83,58 +73,67 @@ class Country implements AuthoredEntityInterface
     #[Assert\NotNull]
     #[Assert\Length(min: 2, max: 2)]
     #[ApiProperty(identifier: true)]
-    private ?string $countryCode = null;
+    private ?string $id = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotNull]
     #[Assert\Length(max: 100)]
-    private ?string $countryName = null;
+    private ?string $name = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\Length(max: 100)]
-    private ?string $createdBy = null;
-
-    #[ORM\ManyToOne(inversedBy: 'countries')]
-    #[ORM\JoinColumn(name: 'region_code', referencedColumnName: 'region_code', nullable: false)]
+    #[ORM\Column]
     #[Assert\NotNull]
-    private ?Region $region = null;
+    private ?bool $active = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
     #[Assert\NotNull]
     private ?int $sortOrder = null;
 
+    #[ORM\Column(length: 100)]
+    #[Assert\Length(max: 100)]
+    private ?string $createdBy = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     #[Assert\Length(max: 100)]
     private ?string $updatedBy = null;
 
-    public function getCountryCode(): ?string
+    #[ORM\ManyToOne(inversedBy: 'countries')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
+    private ?Region $region = null;
+
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'country')]
+    private Collection $users;
+
+    public function __construct()
     {
-        return $this->countryCode;
+        $this->users = new ArrayCollection();
     }
 
-    public function getCountryName(): ?string
+    public function getId(): ?string
     {
-        return $this->countryName;
+        return $this->id;
     }
 
-    public function getCreatedBy(): ?string
+    public function setId(string $id): static
     {
-        return $this->createdBy;
+        $this->id = $id;
+
+        return $this;
     }
 
-    public function getRegion(): ?Region
+    public function getName(): ?string
     {
-        return $this->region;
+        return $this->name;
     }
 
-    public function getSortOrder(): ?int
+    public function setName(string $name): static
     {
-        return $this->sortOrder;
-    }
+        $this->name = $name;
 
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
+        return $this;
     }
 
     public function isActive(): ?bool
@@ -149,30 +148,9 @@ class Country implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setCountryCode(string $countryCode): static
+    public function getSortOrder(): ?int
     {
-        $this->countryCode = $countryCode;
-
-        return $this;
-    }
-
-    public function setCountryName(string $countryName): static
-    {
-        $this->countryName = $countryName;
-
-        return $this;
-    }
-
-    public function setCreatedBy(string $createdBy): void
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    public function setRegion(?Region $region): static
-    {
-        $this->region = $region;
-
-        return $this;
+        return $this->sortOrder;
     }
 
     public function setSortOrder(int $sortOrder): static
@@ -182,8 +160,69 @@ class Country implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function getCreatedBy(): ?string
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(string $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?string
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    public function getRegion(): ?Region
+    {
+        return $this->region;
+    }
+
+    public function setRegion(?Region $region): static
+    {
+        $this->region = $region;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCountry() === $this) {
+                $user->setCountry(null);
+            }
+        }
+
+        return $this;
     }
 }

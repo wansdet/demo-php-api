@@ -49,7 +49,7 @@ final class BlogPostCommentPublishingLeaveListener implements EventSubscriberInt
             $authorName = $author->getName();
             $recipient = $author->getEmail();
             $subject = $this->getSubject($transitionName);
-            $link = $_ENV['APP_URL'].'/blog/post/'.$blogPost->getSlug();
+            $link = $_ENV['FRONTEND_URL'].'/blog/'.$blogPost->getBlogPostId();
 
             if (null !== $recipient && null !== $comment) {
                 $this->sendEmail($recipient, $subject, $comment, $authorName, $remarks, $link);

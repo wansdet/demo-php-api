@@ -1,13 +1,14 @@
 @blog_category
 Feature: Test Blog Category resources
+
   Scenario: Test collection of Blog Category resources
     Given I am not authenticated
     When I request "/api/blog_categories"
     Then the response code is "200"
     And the response key "@context" is "/api/contexts/BlogCategory"
     And the response key "@id" is "/api/blog_categories"
-    And the response key "@type" is "hydra:Collection"
-    And the response key "hydra:totalItems" is "8"
+    And the response key "@type" is "Collection"
+    And the response key "totalItems" is "8"
     And the response collection is a JSON array of length "8"
     And the response collection item has a JSON key "@id"
     And the response collection item has a JSON key "@type"
@@ -51,7 +52,7 @@ Feature: Test Blog Category resources
       | TRAVEL              | Travel              | true    | 8          |
 
   Scenario: Test Blog Category resource update with authorized user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
     {
@@ -61,14 +62,10 @@ Feature: Test Blog Category resources
     }
     """
     When I request "/api/blog_categories/TRANSPORT" with HTTP "PUT"
-    Then the response code is "200"
-    And the response key "@id" is "/api/blog_categories/TRANSPORT"
-    And the response key "blogCategoryCode" is "TRANSPORT"
-    And the response key "blogCategoryName" is "Transport Updated"
-    And the response key "active" is boolean false
+    Then the response code is "405"
 
-  Scenario Outline: Test Blog Category resource update with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+  Scenario Outline: Test Blog Category resource update with authorized user
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
@@ -77,17 +74,15 @@ Feature: Test Blog Category resources
       "active": false
     }
     """
-    When I request "/api/blog_categories/TRANSPORT" with HTTP "PUT"
+    When I request "/api/blog_categories/TECHNOLOGY" with HTTP "PUT"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                       | response_code  |
+      | ADMIN_2                    | 405            |
+      | EDITOR_1                   | 405            |
+      | MODERATOR_1                | 405            |
+      | BLOG_AUTHOR_1              | 405            |
+      | USER_1                     | 405            |
 
   Scenario: Test Blog Category resource update with unauthenticated user
     Given I am not authenticated
@@ -99,11 +94,11 @@ Feature: Test Blog Category resources
       "active": false
     }
     """
-    When I request "/api/blog_categories/TRANSPORT" with HTTP "PUT"
-    Then the response code is "401"
+    When I request "/api/blog_categories/TECHNOLOGY" with HTTP "PUT"
+    Then the response code is "405"
 
     Scenario: Test Blog Category resource patch with authorised user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
     {
@@ -121,7 +116,7 @@ Feature: Test Blog Category resources
     And the response key "active" is boolean false
 
   Scenario Outline: Test Blog Category resource patch with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
@@ -134,14 +129,11 @@ Feature: Test Blog Category resources
     When I request "/api/blog_categories/TRAVEL" with HTTP "PATCH"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                       | response_code  |
+      | EDITOR_1                   | 403            |
+      | MODERATOR_1                | 403            |
+      | BLOG_AUTHOR_1              | 403            |
+      | USER_1                     | 403            |
 
   Scenario: Test Blog Category resource patch with unauthenticated user
     Given I am not authenticated
@@ -158,7 +150,7 @@ Feature: Test Blog Category resources
     Then the response code is "401"
 
   Scenario Outline: Test Blog Category resource creation with authenticated user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
@@ -171,18 +163,15 @@ Feature: Test Blog Category resources
     When I request "/api/blog_categories" with HTTP "POST"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | admin2@example.com            | Demo1234  | 201            |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                       | response_code  |
+      | ADMIN_2                    | 201            |
+      | EDITOR_1                   | 403            |
+      | MODERATOR_1                | 403            |
+      | BLOG_AUTHOR_1              | 403            |
+      | USER_1                     | 403            |
 
   Scenario: Test Blog Category resource creation with authorised user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
     {
@@ -200,7 +189,7 @@ Feature: Test Blog Category resources
     And the response key "active" is boolean true
 
   Scenario Outline: Test Blog Category resource creation with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
@@ -213,14 +202,11 @@ Feature: Test Blog Category resources
     When I request "/api/blog_categories" with HTTP "POST"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                       | response_code  |
+      | EDITOR_1                   | 403            |
+      | MODERATOR_1                | 403            |
+      | BLOG_AUTHOR_1              | 403            |
+      | USER_1                     | 403            |
 
   Scenario: Test Blog Category resource creation with unauthenticated user
     Given I am not authenticated

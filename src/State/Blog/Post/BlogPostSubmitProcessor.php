@@ -11,6 +11,7 @@ use App\Entity\BlogPost;
 use App\Entity\User;
 use App\Exception\WorkflowException;
 use App\Repository\BlogPostRepository;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 
@@ -18,7 +19,8 @@ class BlogPostSubmitProcessor implements ProcessorInterface
 {
     public function __construct(
         private readonly BlogPostRepository $blogPostRepository,
-        private readonly WorkflowInterface $blogPublishing,
+        #[Target('blog_publishing')]
+        private WorkflowInterface $blogPublishingStateMachine,
         private readonly TokenStorageInterface $tokenStorage
     ) {
     }
@@ -36,13 +38,16 @@ class BlogPostSubmitProcessor implements ProcessorInterface
         /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
 
-        try {
+        if ($this->blogPublishingStateMachine->can($blogPost, BlogPost::TRANSITION_SUBMIT)) {
+            var_dump('Can submit');
+            //$this->blogPublishing->apply($blogPost, 'submit');
             $remarks = $data->remarks ?? '';
             $blogPost->setRemarks($remarks);
-            $this->blogPublishing->apply($blogPost, BlogPost::TRANSITION_SUBMIT);
+            //$this->blogPublishingStateMachine->apply($blogPost, BlogPost::TRANSITION_SUBMIT);
+            $blogPost->setStatus(BlogPost::STATUS_SUBMITTED);
             $blogPost->setUpdatedBy($user->getName());
             $this->blogPostRepository->save($blogPost);
-        } catch (\Exception $e) {
+        } else {
             throw new WorkflowException('Blog post cannot be submitted. Please contact the administrator.');
         }
     }

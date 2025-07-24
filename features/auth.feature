@@ -1,26 +1,24 @@
 @auth
 Feature: Test User authentication
-
+  @test
   Scenario Outline: Test User authentication with multiple users
-    Given I am authenticating with username "<email>" and password "<password>"
+    Given I am authenticating as "<user>"
     When I request "/api/login_check" using HTTP POST
     Then the response code is "200"
     And the response key "token" exists
     Examples:
-      | email                         | password  |
-      | admin1@example.com            | Demo1234  |
-      | editor1@example.com           | Demo1234  |
-      | moderator1@example.com        | Demo1234  |
-      | blogauthor1@example.com       | Demo1234  |
-      | finance.director@example.com  | Demo1234  |
-      | sales.manager1@example.com    | Demo1234  |
-      | salesperson1@example.com      | Demo1234  |
-      | user1@example.com             | Demo1234  |
-      | user2@example.net             | Demo1234  |
+    | user          |
+    | ADMIN_1       |
+    | EDITOR_1      |
+    | MODERATOR_1   |
+    | BLOG_AUTHOR_1 |
+    | USER_1        |
+    | USER_2        |
 
     Scenario: Test authentication with invalid credentials
-      Given I am authenticating with username "invalid.user@example.com" and password "Demo1234"
+      Given I am authenticating as "INVALID_USER"
       When I request "/api/login_check" using HTTP POST
+      Then the response code is "401"
       Then the response code is "401"
 
     Scenario: Test unauthenticated user
@@ -29,11 +27,11 @@ Feature: Test User authentication
         Then the response code is "401"
 
     Scenario: Test authorised authenticated user
-      Given I am authenticated as "admin1@example.com" with password "Demo1234"
+      Given I am authenticated as "ADMIN_1"
       When I request "/api/users" with HTTP "GET"
       Then the response code is "200"
 
     Scenario: Test unauthorised authenticated user
-      Given I am authenticated as "user1@example.com" with password "Demo1234"
+      Given I am authenticated as "USER_1"
       When I request "/api/users" with HTTP "GET"
       Then the response code is "403"

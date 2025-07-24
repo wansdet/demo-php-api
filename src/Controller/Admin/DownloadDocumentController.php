@@ -16,6 +16,9 @@ final readonly class DownloadDocumentController
     {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(Document $document): BinaryFileResponse
     {
         return $this->documentDownloadService->download($document);

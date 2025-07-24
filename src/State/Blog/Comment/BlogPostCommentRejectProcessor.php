@@ -37,13 +37,18 @@ class BlogPostCommentRejectProcessor implements ProcessorInterface
         $user = $this->tokenStorage->getToken()->getUser();
 
         try {
-            $remarks = $data->remarks ?? '';
-            $blogPostComment->setRemarks($remarks);
-            $this->blogPostCommentPublishing->apply($blogPostComment, BlogPostComment::TRANSITION_REJECT);
-            $blogPostComment->setUpdatedBy($user->getName());
-            $this->blogPostCommentRepository->save($blogPostComment);
+            if ($this->blogPostCommentPublishing->can($blogPostComment, BlogPostComment::TRANSITION_REJECT)) {
+                // var_dump('Can reject');
+                $remarks = $data->remarks ?? '';
+                $blogPostComment->setRemarks($remarks);
+                //$this->blogPostCommentPublishing->apply($blogPostComment, BlogPostComment::TRANSITION_REJECT);
+                $blogPostComment->setStatus(BlogPostComment::STATUS_REJECTED);
+                $blogPostComment->setUpdatedBy($user->getName());
+                $this->blogPostCommentRepository->save($blogPostComment);
+            }
+            Throw new WorkflowException('Blog post comment has been rejected. Please contact the administrator.');
         } catch (\Exception $e) {
-            throw new WorkflowException('Blog post comment cannot be rejected. Please contact the administrator.');
+            //throw new WorkflowException('Blog post comment cannot be rejected. Please contact the administrator.');
         }
     }
 }

@@ -1,20 +1,39 @@
 api_platform:
     title: DEMO PHP API
-    version: 1.0.0
+    version: 2.0.0
+    formats:
+        jsonld: ['application/ld+json'] # JSON-LD
+        json: ['application/json']
+        # xml: ['application/xml']
+    patch_formats:
+        json: ['application/merge-patch+json']
+        jsonapi: ['application/vnd.api+json']
+    docs_formats:
+        jsonld: ['application/ld+json'] # JSON-LD
+        jsonopenapi: ['application/json'] # JSON
+        html: ['text/html'] # HTML
     defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        extra_properties: # Add properties to the API entry point
+            # standard_put: true # Enable the standard PUT method
+            # rfc_7807_compliant_errors: true # Enable RFC 7807 compliant errors
+        #normalization_context:
+        #    skip_null_values: false
         pagination_enabled: false
         pagination_client_enabled: true
         pagination_items_per_page: 100 # Default value
     collection:
         pagination:
             enabled_parameter_name: pagination # optional
-    formats:
-        jsonld:   ['application/ld+json']
-        json:     ['application/json', 'application/merge-patch+json']
-        jsonapi:  ['application/vnd.api+json']
-        html:     ['text/html']
+    # event_listeners_backward_compatibility_layer: true # Enable the deprecated event listeners
+    # keep_legacy_inflector: false # Keep the deprecated Inflector
 
+    # https://api-platform.com/docs/core/upgrade-guide/
+    use_symfony_listeners: true # Use Symfony event listeners or controllers
 
+    # https://api-platform.com/docs/core/errors/
     exception_to_status:
         # The 4 following handlers are registered by default, keep those lines to prevent unexpected side effects
         Symfony\Component\Serializer\Exception\ExceptionInterface: 400 # Use a raw status code (recommended)

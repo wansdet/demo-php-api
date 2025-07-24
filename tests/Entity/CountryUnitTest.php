@@ -6,6 +6,8 @@ namespace App\Tests\Entity;
 
 use App\Entity\Country;
 use App\Entity\Region;
+use App\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,52 +24,82 @@ final class CountryUnitTest extends TestCase
         $this->country = new Country();
     }
 
-    public function testGetDataSetRegion(): void
+    public function testSetGetId(): void
+    {
+        $id = 'GB';
+        $this->country->setId($id);
+        $this->assertSame($id, $this->country->getId());
+    }
+
+    public function testSetGetName(): void
+    {
+        $name = 'United Kingdom';
+        $this->country->setName($name);
+        $this->assertSame($name, $this->country->getName());
+    }
+
+    public function testSetGetActive(): void
+    {
+        $this->country->setActive(true);
+        $this->assertTrue($this->country->isActive());
+    }
+
+    public function testSetGetSortOrder(): void
+    {
+        $this->country->setSortOrder(6);
+        $this->assertSame(6, $this->country->getSortOrder());
+    }
+
+    public function testSetGetCreatedBy(): void
+    {
+        $createdBy = 'user1';
+        $this->country->setCreatedBy($createdBy);
+        $this->assertSame($createdBy, $this->country->getCreatedBy());
+    }
+
+    public function testSetGetCreatedAt(): void
+    {
+        $this->country->setCreatedAt(new \DateTimeImmutable());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->country->getCreatedAt());
+    }
+
+    public function testSetGetUpdatedBy(): void
+    {
+        $updatedBy = 'user2';
+        $this->country->setUpdatedBy($updatedBy);
+        $this->assertSame($updatedBy, $this->country->getUpdatedBy());
+    }
+
+    public function testSetGetUpdatedAt(): void
+    {
+        $this->country->setUpdatedAt(new \DateTimeImmutable());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->country->getUpdatedAt());
+    }
+
+    public function testSetGetRegion(): void
     {
         $region = new Region();
+        $region->setName('Test Region');
         $this->country->setRegion($region);
-        self::assertEquals($region, $this->country->getRegion());
+        $this->assertSame($region, $this->country->getRegion());
     }
 
-    public function testGetSetActive(): void
+    public function testAddRemoveGetUsers(): void
     {
-        $active = true;
-        $this->country->setActive($active);
-        self::assertEquals($active, $this->country->isActive());
+        $user = new User();
+        $user->setEmail('admin@test.com');
+
+        $this->country->addUser($user);
+        self::assertInstanceOf(ArrayCollection::class, $this->country->getUsers());
+        self::assertEquals(1, $this->country->getUsers()->count());
+
+        $this->country->removeUser($user);
+        self::assertEquals(0, $this->country->getUsers()->count());
     }
 
-    public function testGetSetCountryCode(): void
+    public function testGetUsersInitializesAsEmptyCollection(): void
     {
-        $countryCode = 'GB';
-        $this->country->setCountryCode($countryCode);
-        self::assertEquals($countryCode, $this->country->getCountryCode());
-    }
-
-    public function testGetSetCountryName(): void
-    {
-        $countryName = 'United Kingdom';
-        $this->country->setCountryName($countryName);
-        self::assertEquals($countryName, $this->country->getCountryName());
-    }
-
-    public function testGetSetCreatedBy(): void
-    {
-        $createdBy = 'Created by';
-        $this->country->setCreatedBy($createdBy);
-        self::assertEquals($createdBy, $this->country->getCreatedBy());
-    }
-
-    public function testGetSetSortOrder(): void
-    {
-        $sortOrder = 1;
-        $this->country->setSortOrder($sortOrder);
-        self::assertEquals($sortOrder, $this->country->getSortOrder());
-    }
-
-    public function testGetSetUpdatedBy(): void
-    {
-        $updatedBy = 'Updated by';
-        $this->country->setUpdatedBy($updatedBy);
-        self::assertEquals($updatedBy, $this->country->getUpdatedBy());
+        self::assertInstanceOf(ArrayCollection::class, $this->country->getUsers());
+        self::assertCount(0, $this->country->getUsers());
     }
 }

@@ -10,7 +10,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Repository\BlogPostImageRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -35,15 +34,6 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'groups' => ['BlogPostImage:write'],
             ],
             security: 'is_granted("ROLE_BLOGGER")',
-        ),
-        new Put(
-            normalizationContext: [
-                'groups' => ['BlogPostImage:read'],
-            ],
-            denormalizationContext: [
-                'groups' => ['BlogPostImage:update'],
-            ],
-            security: '(is_granted("ROLE_BLOGGER") && object.getBlogPost().getAuthor().getUserIdentifier() === user.getUserIdentifier()) or is_granted("ROLE_EDITOR")',
         ),
         new Patch(
             normalizationContext: [
@@ -130,9 +120,11 @@ class BlogPostImage implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function setCreatedBy(string $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 
     public function setFilename(?string $filename): static
@@ -149,8 +141,10 @@ class BlogPostImage implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function setUpdatedBy(?string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
     }
 }

@@ -9,8 +9,8 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Dto\Blog\BlogPostCommentTransitionRequest;
 use App\Repository\BlogPostCommentRepository;
 use App\State\Blog\Comment\BlogPostCommentRejectProcessor;
@@ -40,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             security: 'is_granted("ROLE_USER")',
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/blog_post_comments/{blogPostCommentId}/reject',
             status: 200,
             denormalizationContext: [
@@ -197,9 +197,11 @@ class BlogPostComment implements AuthoredEntityInterface, AuthorInterface, UuidI
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function setCreatedBy(string $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 
     public function setRating(?int $rating): static
@@ -223,9 +225,11 @@ class BlogPostComment implements AuthoredEntityInterface, AuthorInterface, UuidI
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function setUpdatedBy(?string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
     }
 
     public function setAuthor(?User $author): void

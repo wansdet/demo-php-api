@@ -38,7 +38,7 @@ final class DocumentReadyNotificationHandler
         $subject = $notification->getSubject();
         $content = $notification->getContent();
         $template = 'emails/document_ready_notification.md';
-        $link = $_ENV['APP_URL'].'/admin/document/';
+        $link = $_ENV['FRONTEND_URL'].'/admin/documents/documents-list';
 
         $email = (new TemplatedEmail())
             ->to($recipient)

@@ -8,13 +8,18 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User;
 
-class UserPostProcessor implements ProcessorInterface
+final readonly class UserPostProcessor implements ProcessorInterface
 {
-    public function __construct(private readonly ProcessorInterface $persistProcessor)
+    public function __construct(private ProcessorInterface $persistProcessor)
     {
     }
 
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = [])
+    /**
+     * {@inheritdoc}
+     *
+     * @return mixed
+ */
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         $data->setCreatedBy($data->getFirstName().' '.$data->getLastName());
 

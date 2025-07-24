@@ -14,13 +14,13 @@ class HydraApiContext extends ApiContext
     private ?string $token = null;
 
     /**
-     * @Given I am authenticated as :username with password :password
+     * @Given I am authenticated as :user
      */
-    public function iAmAuthenticatedAsWithPassword(string $username, string $password): static
+    public function iAmAuthenticatedAs(string $user): static
     {
         $data = [
-            'username' => $username,
-            'password' => $password,
+            'username' => $this->getUserEmail($user),
+            'password' => $this->getTestPassword(),
         ];
 
         $this->setRequestBody(json_encode($data));
@@ -38,13 +38,13 @@ class HydraApiContext extends ApiContext
     }
 
     /**
-     * @Given I am authenticating with username :username and password :password
+     * @Given I am authenticating as :user
      */
-    public function iAmAuthenticatingWithUsernameAndPassword(string $username, string $password): static
+    public function iAmAuthenticatingAs(string $user): static
     {
         $data = [
-            'username' => $username,
-            'password' => $password,
+            'username' => $this->getUserEmail($user),
+            'password' => $this->getTestPassword(),
         ];
 
         $this->setRequestBody(json_encode($data));
@@ -72,12 +72,12 @@ class HydraApiContext extends ApiContext
         $this->requestPath($url);
         $responseJson = json_decode($this->response->getBody()->getContents(), true);
 
-        if (isset($responseJson['hydra:member'][0]['id'])) {
-            $id = $responseJson['hydra:member'][0]['id'];
+        if (isset($responseJson['member'][0]['id'])) {
+            $id = $responseJson['member'][0]['id'];
 
             $this->requestPath($resourcePath.'/'.$id);
         } else {
-            Assert::assertFalse(true, 'Invalid response format. Missing "hydra:member" or "id"');
+            Assert::assertFalse(true, 'Invalid response format. Missing "member" or "id"');
         }
 
         return $this;
@@ -116,7 +116,7 @@ class HydraApiContext extends ApiContext
      */
     public function theResponseCollectionIsEmptyJsonArray(): static
     {
-        $this->theResponseKeyIsEmptyJsonArray('hydra:member');
+        $this->theResponseKeyIsEmptyJsonArray('member');
 
         return $this;
     }
@@ -126,7 +126,7 @@ class HydraApiContext extends ApiContext
      */
     public function theResponseCollectionIsJsonArrayOfLength(int $length): void
     {
-        $this->theResponseKeyIsJsonArrayOfLength('hydra:member', $length);
+        $this->theResponseKeyIsJsonArrayOfLength('member', $length);
     }
 
     /**
@@ -138,8 +138,8 @@ class HydraApiContext extends ApiContext
             $this->responseJson = json_decode($this->response->getBody()->getContents(), true);
         }
 
-        // Check if the key exists in any element of the "hydra:member" array
-        foreach ($this->responseJson['hydra:member'] as $element) {
+        // Check if the key exists in any element of the "member" array
+        foreach ($this->responseJson['member'] as $element) {
             if (isset($element[$key])) {
                 // Key found, fail the step
                 Assert::assertFalse(true, "Key '{$key}' found in the response hydra collection.");
@@ -156,8 +156,8 @@ class HydraApiContext extends ApiContext
             $this->responseJson = json_decode($this->response->getBody()->getContents(), true);
         }
 
-        // Check if the key exists in any element of the "hydra:member" array
-        foreach ($this->responseJson['hydra:member'] as $element) {
+        // Check if the key exists in any element of the "member" array
+        foreach ($this->responseJson['member'] as $element) {
             if (isset($element[$key])) {
                 return; // Key found, so the step passes
             }
@@ -176,8 +176,8 @@ class HydraApiContext extends ApiContext
             $this->responseJson = json_decode($this->response->getBody()->getContents(), true);
         }
 
-        Assert::assertArrayHasKey('hydra:totalItems', $this->responseJson);
-        Assert::assertEquals((int) $totalItems, $this->responseJson['hydra:totalItems']);
+        Assert::assertArrayHasKey('totalItems', $this->responseJson);
+        Assert::assertEquals((int) $totalItems, $this->responseJson['totalItems']);
     }
 
     /**
@@ -298,5 +298,39 @@ class HydraApiContext extends ApiContext
 
         Assert::assertArrayHasKey($key, $this->responseJson);
         Assert::assertMatchesRegularExpression($pattern, $this->responseJson[$key]);
+    }
+
+    private function getUserEmail(string $user): string
+    {
+        $map = [
+            'ADMIN_1' => 'admin1@example.com',
+            'ADMIN_2' => 'admin2@example.com',
+            'EDITOR_1' => 'editor1@example.com',
+            'EDITOR_2' => 'editor2@example.com',
+            'MODERATOR_1' => 'moderator1@example.com',
+            'MODERATOR_2' => 'moderator2@example.com',
+            'BLOG_AUTHOR_1' => 'blogauthor1@example.com',
+            'BLOG_AUTHOR_2' => 'blogauthor2@example.com',
+            'BLOG_AUTHOR_3' => 'blogauthor3@example.com',
+            'BLOG_AUTHOR_4' => 'blogauthor4@example.com',
+            'BLOG_AUTHOR_5' => 'blogauthor5@example.com',
+            'USER_1' => 'user1@example.com',
+            'USER_2' => 'user2@example.net',
+            'USER_3' => 'user3@example.org',
+            'USER_4' => 'user4@example.com',
+            'USER_5' => 'user5@example.net',
+            'INVALID_USER' => 'invaliduser@example.com',
+        ];
+
+        if (!isset($map[$user])) {
+            throw new \InvalidArgumentException("Unknown user key “{$user}”");
+        }
+
+        return $map[$user];
+    }
+
+    private function getTestPassword(): string
+    {
+        return $_ENV['TEST_PASSWORD'] ?? $_SERVER['TEST_PASSWORD'] ?? 'Testing123';
     }
 }

@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Controller\Admin\BlogPostExportAdminController;
 use App\Controller\Admin\BlogPostExportBloggerController;
 use App\Controller\Blog\Reports\BlogPostsMonthlyAuthorsController;
@@ -136,15 +135,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: 'is_granted("ROLE_BLOGGER")',
             name: '_api_blog_posts_export_blogger',
         ),
-        new Put(
-            normalizationContext: [
-                'groups' => ['BlogPost:read'],
-            ],
-            denormalizationContext: [
-                'groups' => ['BlogPost:update'],
-            ],
-            security: '(is_granted("ROLE_BLOGGER") && object.getAuthor().getUserIdentifier() === user.getUserIdentifier()) or is_granted("ROLE_EDITOR")',
-        ),
         new Patch(
             normalizationContext: [
                 'groups' => ['BlogPost:read'],
@@ -154,7 +144,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             security: '(is_granted("ROLE_BLOGGER") && object.getAuthor().getUserIdentifier() === user.getUserIdentifier()) or is_granted("ROLE_EDITOR")',
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/blog_posts/{blogPostId}/submit',
             status: 200,
             denormalizationContext: [
@@ -166,7 +156,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: '_api_blog_posts_item_submit',
             processor: BlogPostSubmitProcessor::class,
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/blog_posts/{blogPostId}/reject',
             status: 200,
             denormalizationContext: [
@@ -178,7 +168,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: '_api_blog_posts_item_reject',
             processor: BlogPostRejectProcessor::class,
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/blog_posts/{blogPostId}/publish',
             status: 200,
             denormalizationContext: [
@@ -190,7 +180,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: '_api_blog_posts_item_publish',
             processor: BlogPostPublishProcessor::class,
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/blog_posts/{blogPostId}/archive',
             status: 200,
             denormalizationContext: [
@@ -245,14 +235,14 @@ class BlogPost implements AuthoredEntityInterface, AuthorInterface, UuidInterfac
     #[Assert\NotNull]
     private ?BlogCategory $blogCategory = null;
 
-    #[ORM\OneToMany(mappedBy: 'blogPost', targetEntity: BlogPostComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: BlogPostComment::class, mappedBy: 'blogPost', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $blogPostComments;
 
     #[ORM\Column(type: 'uuid', unique: true)]
     #[ApiProperty(identifier: true)]
     private ?Uuid $blogPostId = null;
 
-    #[ORM\OneToMany(mappedBy: 'blogPost', targetEntity: BlogPostImage::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: BlogPostImage::class, mappedBy: 'blogPost', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $blogPostImages;
 
     #[ORM\Column(length: 4000)]
@@ -455,9 +445,11 @@ class BlogPost implements AuthoredEntityInterface, AuthorInterface, UuidInterfac
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function setCreatedBy(string $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 
     public function setFeatured(?int $featured): static
@@ -502,9 +494,11 @@ class BlogPost implements AuthoredEntityInterface, AuthorInterface, UuidInterfac
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function setUpdatedBy(?string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
     }
 
     public function setAuthor(?User $author): void

@@ -23,9 +23,9 @@ class BlogPostExportBloggerController extends AbstractController
 
         if (null == $user->getId()) {
             throw new \Exception('User not found.');
-        } else {
-            $bus->dispatch(new BlogPostReportExportBlogger($user->getId()));
         }
+
+        $bus->dispatch(new BlogPostReportExportBlogger($user->getId()));
 
         return new JsonResponse(null, Response::HTTP_OK);
     }

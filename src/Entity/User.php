@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Controller\User\PasswordChangeController;
 use App\Controller\User\UserAccountUpdateController;
 use App\Repository\UserRepository;
@@ -31,7 +30,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     operations: [
         new Get(
-            security: 'is_granted("ROLE_MODERATOR") or is_granted("ROLE_SALESPERSON") or is_granted("ROLE_FINANCE") or (is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier())',
+            normalizationContext: [
+                'groups' => ['User:read'],
+            ],
+            security: 'is_granted("ROLE_MODERATOR") or (is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier())',
         ),
         new Get(
             uriTemplate: '/user_account',
@@ -46,7 +48,7 @@ use Symfony\Component\Validator\Constraints as Assert;
             normalizationContext: [
                 'groups' => ['UserCollection:read'],
             ],
-            security: 'is_granted("ROLE_MODERATOR") or is_granted("ROLE_SALESPERSON") or is_granted("ROLE_FINANCE")',
+            security: 'is_granted("ROLE_MODERATOR")',
         ),
         new GetCollection(
             uriTemplate: '/users/blogs/authors',
@@ -62,13 +64,16 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             processor: UserPostProcessor::class,
         ),
-        new Put(
+        new Patch(
+            normalizationContext: [
+                'groups' => ['User:read'],
+            ],
             denormalizationContext: [
                 'groups' => ['User:update'],
             ],
-            security: 'is_granted("ROLE_ADMIN") or (is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier())',
+            security: 'is_granted("ROLE_ADMIN")',
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/user_account/{userId}',
             controller: UserAccountUpdateController::class,
             normalizationContext: [
@@ -78,9 +83,9 @@ use Symfony\Component\Validator\Constraints as Assert;
                 'groups' => ['UserAccount:update'],
             ],
             security: 'is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier()',
-            name: '_api_put_users_account',
+            name: '_api_put_users_account'
         ),
-        new Put(
+        new Patch(
             uriTemplate: '/user_password_change/{userId}',
             controller: PasswordChangeController::class,
             normalizationContext: [
@@ -92,31 +97,27 @@ use Symfony\Component\Validator\Constraints as Assert;
             security: 'is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier()',
             name: '_api_put_users_password_change',
         ),
-        new Patch(
-            denormalizationContext: [
-                'groups' => ['User:update'],
-            ],
-            security: 'is_granted("ROLE_ADMIN") or (is_granted("IS_AUTHENTICATED_FULLY") and object.getUserIdentifier() == user.getUserIdentifier())',
-        ),
         new Delete(
             security: 'is_granted("ROLE_ADMIN")',
         ),
     ],
-    normalizationContext: [
-        'groups' => ['User:read'],
-    ],
     filters: [
         'user.search_filter',
         'user.order_filter',
+    ],
+    order: [
+        'lastName' => 'ASC',
     ],
     paginationClientItemsPerPage: true,
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, AuthoredEntityInterface, UuidInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, UuidInterface, AuthoredEntityInterface
 {
     use TimestampsTrait;
+
+    public const ROLE_ACCOUNTS = 'ROLE_ACCOUNTS';
 
     public const ROLE_ADMIN = 'ROLE_ADMIN';
 
@@ -124,36 +125,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
 
     public const ROLE_EDITOR = 'ROLE_EDITOR';
 
-    public const ROLE_FINANCE = 'ROLE_FINANCE';
-
     public const ROLE_MODERATOR = 'ROLE_MODERATOR';
-
-    public const ROLE_SALES_MANAGER = 'ROLE_SALES_MANAGER';
-
-    public const ROLE_SALESPERSON = 'ROLE_SALESPERSON';
 
     public const ROLE_USER = 'ROLE_USER';
 
-    public const SEX_FEMALE = 'female';
-
-    public const SEX_MALE = 'male';
-
-    public const SEX_NOT_SPECIFIED = 'not_specified';
-
-    public const SEXES = [
-        self::SEX_NOT_SPECIFIED,
-        self::SEX_FEMALE,
-        self::SEX_MALE,
-    ];
-
     public const USER_ROLES = [
+        self::ROLE_ACCOUNTS,
         self::ROLE_ADMIN,
+        self::ROLE_BLOGGER,
         self::ROLE_EDITOR,
         self::ROLE_MODERATOR,
-        self::ROLE_BLOGGER,
-        self::ROLE_FINANCE,
-        self::ROLE_SALES_MANAGER,
-        self::ROLE_SALESPERSON,
         self::ROLE_USER,
     ];
 
@@ -172,41 +153,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
         self::STATUS_SUSPENDED,
     ];
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BlogPostComment::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $blogPostComments;
+    public const TITLE_MR = 'Mr';
+    public const TITLE_MRS = 'Mrs';
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: BlogPost::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    private Collection $blogPosts;
+    public const TITLE_MISS = 'Miss';
 
-    #[ORM\Column(length: 100)]
-    #[Assert\Length(max: 100)]
-    private ?string $createdBy = null;
+    public const TITLE_MS = 'Ms';
+    public const TITLE_DR = 'Dr';
+    public const TITLE_PROF = 'Prof';
 
-    #[Assert\NotBlank(groups: ['UserPassword:update'])]
-    private ?string $currentPassword = null;
+    public const USER_TITLES = [
+        self::TITLE_MR,
+        self::TITLE_MRS,
+        self::TITLE_MISS,
+        self::TITLE_MS,
+        self::TITLE_DR,
+        self::TITLE_PROF,
+    ];
 
-    #[ORM\Column(length: 500, nullable: true)]
-    #[Assert\Length(max: 500)]
-    private ?string $description = null;
+    public const GENDER_FEMALE = 'female';
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $displayName = null;
+    public const GENDER_MALE = 'male';
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dob = null;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Document::class, cascade: ['remove'], orphanRemoval: true)]
-    private Collection $documents;
-
-    #[ORM\Column(length: 180)]
-    #[Assert\Email]
-    #[Assert\Length(max: 180)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 50)]
-    #[Assert\NotNull]
-    #[Assert\Length(min: 2, max: 50)]
-    private ?string $firstName = null;
+    public const USER_GENDERS = [
+        self::GENDER_FEMALE,
+        self::GENDER_MALE,
+    ];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -214,28 +186,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
     #[ApiProperty(identifier: false)]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    #[Assert\Length(max: 50)]
-    private ?string $jobTitle = null;
-
-    #[ORM\Column(length: 50)]
-    #[Assert\NotNull]
-    #[Assert\Length(min: 2, max: 50)]
-    private ?string $lastName = null;
-
-    #[ORM\Column(length: 50, nullable: true)]
-    #[Assert\Length(max: 50)]
-    private ?string $middleName = null;
-
-    #[Assert\NotBlank(groups: ['UserPassword:update'])]
-    #[Assert\Length(min: 8, max: 30, groups: ['UserPassword:update'])]
-    private ?string $newPassword = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
-
-    #[Assert\Length(max: 255)]
-    private ?string $remarks = null;
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
+    private ?string $email = null;
 
     /**
      * @var array <string>
@@ -244,21 +198,84 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
     #[Assert\Choice(choices: self::USER_ROLES, multiple: true)]
     private array $roles = [];
 
+    #[ORM\Column(length: 255)]
+    private ?string $password = null;
+
+    #[Assert\NotBlank(groups: ['UserPassword:update'])]
+    private ?string $currentPassword = null;
+
+    #[Assert\NotBlank(groups: ['UserPassword:update'])]
+    #[Assert\Length(min: 8, max: 30, groups: ['UserPassword:update'])]
+    private ?string $newPassword = null;
+
+    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ApiProperty(identifier: true)]
+    private ?Uuid $userId = null;
+
+    #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: self::USER_TITLES)]
+    private ?string $title = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotNull]
+    #[Assert\Length(max: 50)]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotNull]
+    #[Assert\Length(max: 50)]
+    private ?string $lastName = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
+    private ?string $middleName = null;
+
     #[ORM\Column(length: 20, nullable: true)]
-    #[Assert\Choice(choices: self::SEXES)]
-    private ?string $sex = null;
+    #[Assert\Choice(choices: self::USER_GENDERS)]
+    private ?string $gender = null;
+
+    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    private ?int $birthYear = null;
+
+    #[ORM\Column(length: 20, unique: true)]
+    #[Assert\NotNull]
+    #[Assert\Length(max: 20)]
+    private ?string $displayName = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Length(max: 50)]
+    private ?string $jobTitle = null;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    #[Assert\Length(max: 500)]
+    private ?string $description = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $customerNumber = null;
 
     #[ORM\Column(length: 10)]
     #[Assert\Choice(choices: self::USER_STATUSES)]
     private ?string $status = null;
 
+    #[ORM\Column(length: 100)]
+    #[Assert\Length(max: 100)]
+    private ?string $createdBy = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     #[Assert\Length(max: 100)]
     private ?string $updatedBy = null;
 
-    #[ORM\Column(type: 'uuid', unique: true)]
-    #[ApiProperty(identifier: true)]
-    private ?Uuid $userId = null;
+    #[ORM\OneToMany(targetEntity: Document::class, mappedBy: 'user', cascade: ['remove'], orphanRemoval: true)]
+    private Collection $documents;
+
+    #[ORM\OneToMany(targetEntity: BlogPost::class, mappedBy: 'author', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $blogPosts;
+
+    #[ORM\OneToMany(targetEntity: BlogPostComment::class, mappedBy: 'author', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $blogPostComments;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Country $country = null;
 
     public function __construct()
     {
@@ -266,65 +283,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
 
         // On creation guarantee every user at least has ROLE_USER
         $this->roles[] = 'ROLE_USER';
+        $this->documents = new ArrayCollection();
         $this->blogPosts = new ArrayCollection();
         $this->blogPostComments = new ArrayCollection();
-        $this->documents = new ArrayCollection();
     }
 
-    public function addBlogPost(BlogPost $blogPost): static
+    public function getId(): ?int
     {
-        if (!$this->blogPosts->contains($blogPost)) {
-            $this->blogPosts->add($blogPost);
-            $blogPost->setAuthor($this);
-        }
+        return $this->id;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
 
         return $this;
-    }
-
-    public function addBlogPostComment(BlogPostComment $blogPostComment): static
-    {
-        if (!$this->blogPostComments->contains($blogPostComment)) {
-            $this->blogPostComments->add($blogPostComment);
-            $blogPostComment->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function addDocument(Document $document): static
-    {
-        if (!$this->documents->contains($document)) {
-            $this->documents->add($document);
-            $document->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // TODO: Implement eraseCredentials() method.
     }
 
     /**
-     * @return Collection<int, BlogPostComment>
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
      */
-    public function getBlogPostComments(): Collection
+    public function getUserIdentifier(): string
     {
-        return $this->blogPostComments;
+        return $this->email;
     }
 
     /**
-     * @return Collection<int, BlogPost>
+     * @see UserInterface
      */
-    public function getBlogPosts(): Collection
+    public function getRoles(): array
     {
-        return $this->blogPosts;
+        return $this->roles;
     }
 
-    public function getCreatedBy(): ?string
+    public function setRoles(array $roles): static
     {
-        return $this->createdBy;
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     public function getCurrentPassword(): ?string
@@ -332,9 +350,121 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
         return $this->currentPassword;
     }
 
-    public function getDescription(): ?string
+    public function setCurrentPassword(string $currentPassword): static
     {
-        return $this->description;
+        $this->currentPassword = $currentPassword;
+
+        return $this;
+    }
+
+    public function getNewPassword(): ?string
+    {
+        return $this->newPassword;
+    }
+
+    public function setNewPassword(string $newPassword): static
+    {
+        $this->newPassword = $newPassword;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getUserId(): ?Uuid
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(Uuid $userId): static
+    {
+        $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): static
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): static
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): static
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getMiddleName(): ?string
+    {
+        return $this->middleName;
+    }
+
+    public function setMiddleName(?string $middleName): static
+    {
+        $this->middleName = $middleName;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->getFirstName().' '.$this->getLastName();
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?string $gender): static
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+
+    public function getBirthYear(): ?int
+    {
+        return $this->birthYear;
+    }
+
+    public function setBirthYear(?int $birthYear): static
+    {
+        $this->birthYear = $birthYear;
+
+        return $this;
     }
 
     public function getDisplayName(): ?string
@@ -342,9 +472,88 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
         return $this->displayName;
     }
 
-    public function getDob(): ?\DateTimeInterface
+    public function setDisplayName(string $displayName): static
     {
-        return $this->dob;
+        $this->displayName = $displayName;
+
+        return $this;
+    }
+
+    public function getJobTitle(): ?string
+    {
+        return $this->jobTitle;
+    }
+
+    public function setJobTitle(?string $jobTitle): static
+    {
+        $this->jobTitle = $jobTitle;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCustomerNumber(): ?int
+    {
+        return $this->customerNumber;
+    }
+
+    public function setCustomerNumber(?int $customerNumber): static
+    {
+        $this->customerNumber = $customerNumber;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?string
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(string $createdBy): static
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getUpdatedBy(): ?string
+    {
+        return $this->updatedBy;
+    }
+
+    public function setUpdatedBy(string $updatedBy): static
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    public function setUuid(Uuid $uuid): void
+    {
+        $this->userId = $uuid;
     }
 
     /**
@@ -355,105 +564,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
         return $this->documents;
     }
 
-    public function getEmail(): ?string
+    public function addDocument(Document $document): static
     {
-        return $this->email;
-    }
-
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getJobTitle(): ?string
-    {
-        return $this->jobTitle;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function getMiddleName(): ?string
-    {
-        return $this->middleName;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->getFirstName().' '.$this->getLastName();
-    }
-
-    public function getNewPassword(): ?string
-    {
-        return $this->newPassword;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function getRemarks(): ?string
-    {
-        return $this->remarks;
-    }
-
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    public function getSex(): ?string
-    {
-        return $this->sex;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }
-
-    public function getUserId(): ?Uuid
-    {
-        return $this->userId;
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
-    }
-
-    public function removeBlogPost(BlogPost $blogPost): static
-    {
-        if ($this->blogPosts->removeElement($blogPost)) {
-            // set the owning side to null (unless already changed)
-            if ($blogPost->getAuthor() === $this) {
-                $blogPost->setAuthor(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function removeBlogPostComment(BlogPostComment $blogPostComment): static
-    {
-        if ($this->blogPostComments->removeElement($blogPostComment)) {
-            // set the owning side to null (unless already changed)
-            if ($blogPostComment->getAuthor() === $this) {
-                $blogPostComment->setAuthor(null);
-            }
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+            $document->setUser($this);
         }
 
         return $this;
@@ -471,133 +586,75 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Authore
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function addBlogPost(BlogPost $blogPost): static
     {
-        $this->createdBy = $createdBy;
-    }
-
-    public function setCurrentPassword(?string $currentPassword): static
-    {
-        $this->currentPassword = $currentPassword;
-
-        return $this;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    public function setDisplayName(?string $displayName): static
-    {
-        $this->displayName = $displayName;
-
-        return $this;
-    }
-
-    public function setDob(?\DateTimeInterface $dob): static
-    {
-        $this->dob = $dob;
-
-        return $this;
-    }
-
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function setJobTitle(?string $jobTitle): static
-    {
-        $this->jobTitle = $jobTitle;
-
-        return $this;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    public function setMiddleName(?string $middleName): static
-    {
-        $this->middleName = $middleName;
-
-        return $this;
-    }
-
-    public function setNewPassword(?string $newPassword): static
-    {
-        $this->newPassword = $newPassword;
-
-        return $this;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    public function setRemarks(?string $remarks): static
-    {
-        $this->remarks = $remarks;
+        if (!$this->blogPosts->contains($blogPost)) {
+            $this->blogPosts->add($blogPost);
+            $blogPost->setAuthor($this);
+        }
 
         return $this;
     }
 
     /**
-     * @param array<string> $roles
+     * @return Collection<int, BlogPost>
      */
-    public function setRoles(array $roles): static
+    public function getBlogPosts(): Collection
     {
-        $this->roles = $roles;
+        return $this->blogPosts;
+    }
+
+    public function removeBlogPost(BlogPost $blogPost): static
+    {
+        if ($this->blogPosts->removeElement($blogPost)) {
+            // set the owning side to null (unless already changed)
+            if ($blogPost->getAuthor() === $this) {
+                $blogPost->setAuthor(null);
+            }
+        }
 
         return $this;
     }
 
-    public function setSex(?string $sex): static
+    public function addBlogPostComment(BlogPostComment $blogPostComment): static
     {
-        $this->sex = $sex;
+        if (!$this->blogPostComments->contains($blogPostComment)) {
+            $this->blogPostComments->add($blogPostComment);
+            $blogPostComment->setAuthor($this);
+        }
 
         return $this;
     }
 
-    public function setStatus(string $status): static
+    /**
+     * @return Collection<int, BlogPostComment>
+     */
+    public function getBlogPostComments(): Collection
     {
-        $this->status = $status;
+        return $this->blogPostComments;
+    }
+
+    public function removeBlogPostComment(BlogPostComment $blogPostComment): static
+    {
+        if ($this->blogPostComments->removeElement($blogPostComment)) {
+            // set the owning side to null (unless already changed)
+            if ($blogPostComment->getAuthor() === $this) {
+                $blogPostComment->setAuthor(null);
+            }
+        }
 
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function getCountry(): ?Country
     {
-        $this->updatedBy = $updatedBy;
+        return $this->country;
     }
 
-    public function setUserId(Uuid $userId): static
+    public function setCountry(?Country $country): static
     {
-        $this->userId = $userId;
+        $this->country = $country;
 
         return $this;
-    }
-
-    public function setUuid(Uuid $uuid): void
-    {
-        $this->userId = $uuid;
     }
 }

@@ -10,11 +10,11 @@ use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class UserAccountProvider implements ProviderInterface
+final readonly class UserAccountProvider implements ProviderInterface
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly TokenStorageInterface $tokenStorage
+        private UserRepository $userRepository,
+        private TokenStorageInterface $tokenStorage,
     ) {
     }
 

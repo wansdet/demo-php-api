@@ -48,50 +48,6 @@ class BlogPostCommentFixtures extends Fixture implements DependentFixtureInterfa
         $authorRepository = $manager->getRepository(User::class);
         $blogPostsUsers = $authorRepository->findUsersByRole(User::ROLE_USER);
 
-        // Create demo blogPost post comments with specified blogPostCommentId for API testing
-        BlogPostCommentFactory::createSequence([
-            [
-                'blogPostCommentId' => Uuid::fromString('564ed8cb-59d2-3bf6-a2b2-213b8f096c8a'),
-                'comment' => 'Demo blog post comment. '.$this->faker->paragraph(),
-                'rating' => 10,
-                'status' => BlogPostComment::STATUS_PUBLISHED,
-                'createdAt' => $this->faker->dateTimeInInterval('- 290 day', '+ 0 day'),
-                'createdBy' => 'Mary Smith',
-                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
-                'author' => $authorRepository->findOneBy(['email' => 'user1@example.com']),
-            ],
-            [
-                'blogPostCommentId' => Uuid::fromString('6578142c-b69a-3a05-8115-5f781b49b124'),
-                'comment' => 'Demo blog post comment for API testing.',
-                'rating' => 10,
-                'status' => BlogPostComment::STATUS_PUBLISHED,
-                'createdAt' => $this->faker->dateTimeInInterval('- 290 day', '+ 0 day'),
-                'createdBy' => 'John Richards',
-                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
-                'author' => $authorRepository->findOneBy(['email' => 'user2@example.net']),
-            ],
-            [
-                'blogPostCommentId' => Uuid::fromString('28b86172-470c-38a4-8ca5-8d27e07ef9be'),
-                'comment' => 'Demo blog post comment for API testing with status PUBLISHED.',
-                'rating' => 8,
-                'status' => BlogPostComment::STATUS_PUBLISHED,
-                'createdAt' => $this->faker->dateTimeInInterval('- 290 day', '+ 0 day'),
-                'createdBy' => 'Catherine Jones',
-                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
-                'author' => $authorRepository->findOneBy(['email' => 'user.3@example.org']),
-            ],
-            [
-                'blogPostCommentId' => Uuid::fromString('224ca37a-e8a3-3397-9c86-044fa9b44075'),
-                'comment' => 'Demo blog post comment for API testing with status REJECTED.',
-                'rating' => 8,
-                'status' => BlogPostComment::STATUS_REJECTED,
-                'createdAt' => $this->faker->dateTimeInInterval('- 290 day', '+ 0 day'),
-                'createdBy' => 'Christopher Parry',
-                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
-                'author' => $authorRepository->findOneBy(['email' => 'user.4@example.com']),
-            ],
-        ]);
-
         // $blogPosts = $manager->getRepository(BlogPost::class)->findBy(['featured' => null]);
         $blogPosts = $manager->getRepository(BlogPost::class)->findAll();
         $totalBlogPosts = count($blogPosts);
@@ -100,7 +56,7 @@ class BlogPostCommentFixtures extends Fixture implements DependentFixtureInterfa
         $blogPostCounter = 0;
         foreach ($blogPosts as $blogPost) {
             ++$blogPostCounter;
-            $totalComments = $this->faker->numberBetween(0, 3);
+            $totalComments = $this->faker->numberBetween(0, 1);
 
             $addDays = 2;
             foreach (range(1, $totalComments) as $i) {
@@ -131,5 +87,49 @@ class BlogPostCommentFixtures extends Fixture implements DependentFixtureInterfa
                 BlogPostCommentFactory::new()->create($comment);
             }
         }
+
+        // Create demo blogPost post comments with specified blogPostCommentId for Automation testing
+        BlogPostCommentFactory::createSequence([
+            [
+                'blogPostCommentId' => Uuid::fromString('564ed8cb-59d2-3bf6-a2b2-213b8f096c8a'),
+                'comment' => 'Demo blog post comment.'.$this->faker->paragraph(),
+                'rating' => 10,
+                'status' => BlogPostComment::STATUS_PUBLISHED,
+                'createdAt' => $this->faker->dateTimeInInterval('- 4 day', '+ 0 day'),
+                'createdBy' => 'Aaliyah Aaron',
+                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
+                'author' => $authorRepository->findOneBy(['email' => 'user1@example.com']),
+            ],
+            [
+                'blogPostCommentId' => Uuid::fromString('6578142c-b69a-3a05-8115-5f781b49b124'),
+                'comment' => 'Demo blog post comment for Automation Testing.',
+                'rating' => 10,
+                'status' => BlogPostComment::STATUS_PUBLISHED,
+                'createdAt' => $this->faker->dateTimeInInterval('- 3 day', '+ 0 day'),
+                'createdBy' => 'John Richards',
+                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
+                'author' => $authorRepository->findOneBy(['email' => 'user2@example.net']),
+            ],
+            [
+                'blogPostCommentId' => Uuid::fromString('28b86172-470c-38a4-8ca5-8d27e07ef9be'),
+                'comment' => 'Demo blog post comment for Automation Testing with status PUBLISHED.',
+                'rating' => 8,
+                'status' => BlogPostComment::STATUS_PUBLISHED,
+                'createdAt' => $this->faker->dateTimeInInterval('- 2 day', '+ 0 day'),
+                'createdBy' => 'Catherine Jones',
+                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
+                'author' => $authorRepository->findOneBy(['email' => 'user3@example.org']),
+            ],
+            [
+                'blogPostCommentId' => Uuid::fromString('224ca37a-e8a3-3397-9c86-044fa9b44075'),
+                'comment' => 'Demo blog post comment for Automation Testing with status REJECTED.',
+                'rating' => 8,
+                'status' => BlogPostComment::STATUS_REJECTED,
+                'createdAt' => $this->faker->dateTimeInInterval('- 1 day', '+ 0 day'),
+                'createdBy' => 'Christopher Parry',
+                'blogPost' => $manager->getRepository(BlogPost::class)->findOneBy(['blogPostId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974')]),
+                'author' => $authorRepository->findOneBy(['email' => 'user4@example.com']),
+            ],
+        ]);
     }
 }

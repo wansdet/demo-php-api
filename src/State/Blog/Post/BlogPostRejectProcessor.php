@@ -36,13 +36,14 @@ class BlogPostRejectProcessor implements ProcessorInterface
         /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
 
-        try {
+        if ($this->blogPublishing->can($blogPost, BlogPost::TRANSITION_REJECT)) {
             $remarks = $data->remarks ?? '';
             $blogPost->setRemarks($remarks);
-            $this->blogPublishing->apply($blogPost, BlogPost::TRANSITION_REJECT);
+            // $this->blogPublishing->apply($blogPost, BlogPost::TRANSITION_REJECT);
+            $blogPost->setStatus(BlogPost::STATUS_REJECTED);
             $blogPost->setUpdatedBy($user->getName());
             $this->blogPostRepository->save($blogPost);
-        } catch (\Exception $e) {
+        } else {
             throw new WorkflowException('Blog post cannot be rejected. Please contact the administrator.');
         }
     }

@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class UserAccountUpdateService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 

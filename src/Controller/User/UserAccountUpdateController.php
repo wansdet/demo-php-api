@@ -9,9 +9,9 @@ use App\Service\User\UserAccountUpdateService;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 
 #[AsController]
-class UserAccountUpdateController
+final readonly class UserAccountUpdateController
 {
-    public function __construct(private readonly UserAccountUpdateService $userAccountUpdateService)
+    public function __construct(private UserAccountUpdateService $userAccountUpdateService)
     {
     }
 

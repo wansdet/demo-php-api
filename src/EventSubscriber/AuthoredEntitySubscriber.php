@@ -50,12 +50,12 @@ final class AuthoredEntitySubscriber implements EventSubscriberInterface
 
         if (Request::METHOD_POST === $method) {
             // var_dump('AuthoredEntitySubscriber: POST');
-            $entity->setCreatedBy($author->getName());
+            $entity->setCreatedBy($author->getDisplayName());
         }
 
         if (Request::METHOD_PUT === $method) {
             // var_dump('AuthoredEntitySubscriber: PUT');
-            $entity->setUpdatedBy($author->getName());
+            $entity->setUpdatedBy($author->getDisplayName());
             $entity->setUpdatedAt(new \DateTimeImmutable());
         }
     }

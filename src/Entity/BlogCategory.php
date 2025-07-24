@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Repository\BlogCategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -37,15 +36,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             denormalizationContext: [
                 'groups' => ['BlogCategory:write'],
-            ],
-            security: 'is_granted("ROLE_ADMIN")',
-        ),
-        new Put(
-            normalizationContext: [
-                'groups' => ['BlogCategory:read'],
-            ],
-            denormalizationContext: [
-                'groups' => ['BlogCategory:update'],
             ],
             security: 'is_granted("ROLE_ADMIN")',
         ),
@@ -91,7 +81,7 @@ class BlogCategory implements AuthoredEntityInterface
     #[Assert\Length(min: 2, max: 30)]
     private ?string $blogCategoryName = null;
 
-    #[ORM\OneToMany(mappedBy: 'blogCategory', targetEntity: BlogPost::class)]
+    #[ORM\OneToMany(targetEntity: BlogPost::class, mappedBy: 'blogCategory')]
     private Collection $blogPosts;
 
     #[ORM\Column(length: 100)]
@@ -192,9 +182,11 @@ class BlogCategory implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function setCreatedBy(string $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 
     public function setSortOrder(int $sortOrder): static
@@ -204,8 +196,10 @@ class BlogCategory implements AuthoredEntityInterface
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function setUpdatedBy(?string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
     }
 }

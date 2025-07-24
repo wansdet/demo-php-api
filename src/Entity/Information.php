@@ -11,7 +11,6 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Repository\InformationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -36,15 +35,6 @@ use Symfony\Component\Validator\Constraints as Assert;
             ],
             denormalizationContext: [
                 'groups' => ['Information:write'],
-            ],
-            security: 'is_granted("ROLE_ADMIN")',
-        ),
-        new Put(
-            normalizationContext: [
-                'groups' => ['Information:read'],
-            ],
-            denormalizationContext: [
-                'groups' => ['Information:update'],
             ],
             security: 'is_granted("ROLE_ADMIN")',
         ),
@@ -184,9 +174,11 @@ class Information implements AuthoredEntityInterface, UuidInterface
         return $this;
     }
 
-    public function setCreatedBy(string $createdBy): void
+    public function setCreatedBy(string $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
     }
 
     public function setInformation(string $information): static
@@ -231,9 +223,11 @@ class Information implements AuthoredEntityInterface, UuidInterface
         return $this;
     }
 
-    public function setUpdatedBy(?string $updatedBy): void
+    public function setUpdatedBy(?string $updatedBy): static
     {
         $this->updatedBy = $updatedBy;
+
+        return $this;
     }
 
     public function setUuid(Uuid $uuid): void

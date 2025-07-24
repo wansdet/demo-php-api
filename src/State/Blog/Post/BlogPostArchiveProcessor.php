@@ -36,13 +36,14 @@ final class BlogPostArchiveProcessor implements ProcessorInterface
         /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
 
-        try {
+        if ($this->blogPublishing->can($blogPost, BlogPost::TRANSITION_ARCHIVE)) {
             $remarks = $data->remarks ?? '';
             $blogPost->setRemarks($remarks);
-            $this->blogPublishing->apply($blogPost, BlogPost::TRANSITION_ARCHIVE);
+            // $this->blogPublishing->apply($blogPost, BlogPost::TRANSITION_ARCHIVE);
+            $blogPost->setStatus(BlogPost::STATUS_ARCHIVED);
             $blogPost->setUpdatedBy($user->getName());
             $this->blogPostRepository->save($blogPost);
-        } catch (\Exception $e) {
+        } else {
             throw new WorkflowException('Blog post cannot be archived. Please contact the administrator.');
         }
     }

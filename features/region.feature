@@ -1,18 +1,19 @@
 @region
-Feature: Test Region resources
+Feature: Test Region resource
+
   Scenario: Test collection of Region resources
     Given I am not authenticated
     When I request "/api/regions"
     Then the response code is "200"
     And the response key "@context" is "/api/contexts/Region"
     And the response key "@id" is "/api/regions"
-    And the response key "@type" is "hydra:Collection"
-    And the response key "hydra:totalItems" is "10"
+    And the response key "@type" is "Collection"
+    And the response key "totalItems" is "10"
     And the response collection is a JSON array of length "10"
     And the response collection item has a JSON key "@id"
     And the response collection item has a JSON key "@type"
-    And the response collection item has a JSON key "regionCode"
-    And the response collection item has a JSON key "regionName"
+    And the response collection item has a JSON key "id"
+    And the response collection item has a JSON key "name"
     And the response collection item has a JSON key "active"
     And the response collection item has a JSON key "sortOrder"
 
@@ -23,8 +24,8 @@ Feature: Test Region resources
     And the response key "@context" is "/api/contexts/Region"
     And the response key "@id" is "/api/regions/EUROPE"
     And the response key "@type" is "Region"
-    And the response key "regionCode" exists
-    And the response key "regionName" exists
+    And the response key "id" exists
+    And the response key "name" exists
     And the response key "active" exists
     And the response key "sortOrder" exists
     And the response key "createdAt" exists
@@ -37,8 +38,8 @@ Feature: Test Region resources
     Then the response code is "200"
     And the response key "@id" is "/api/regions/<region_code>"
     And the response key "countries" is a JSON array of length "<country_count>"
-    And the response key "regionCode" is "<region_code>"
-    And the response key "regionName" is "<region_name>"
+    And the response key "id" is "<region_code>"
+    And the response key "name" is "<region_name>"
     And the response key "sortOrder" is "<sort_order>"
       Examples:
         | region_code     | country_count | region_code     | region_name     | sort_order |
@@ -54,27 +55,24 @@ Feature: Test Region resources
         | SOUTH_AMERICA   | 10            | SOUTH_AMERICA   | South America   | 9          |
 
   Scenario: Test Region resource update with authorised user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
     {
-      "regionName": "Africa updated",
+      "name": "Africa updated",
       "sortOrder": 2,
       "active": false
     }
     """
     When I request "/api/regions/AFRICA" with HTTP "PUT"
-    Then the response code is "200"
-    And the response key "regionName" is "Africa updated"
-    And the response key "sortOrder" is 2
-    And the response key "active" is boolean "false"
+    Then the response code is "405"
 
   Scenario Outline: Test Region resource update with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
-      "regionName": "Africa updated",
+      "name": "Africa updated",
       "sortOrder": 2,
       "active": false
     }
@@ -82,34 +80,31 @@ Feature: Test Region resources
     When I request "/api/regions/AFRICA" with HTTP "PUT"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                          | response_code  |
+      | EDITOR_1                     | 405            |
+      | MODERATOR_1                  | 405            |
+      | BLOG_AUTHOR_1                | 405            |
+      | USER_1                       | 405            |
 
   Scenario: Test Region resource update with unauthenticated user
     Given I am not authenticated
     And the request body is:
     """
     {
-      "regionName": "Africa updated",
+      "name": "Africa updated",
       "sortOrder": 2,
       "active": false
     }
     """
     When I request "/api/regions/AFRICA" with HTTP "PUT"
-    Then the response code is "401"
+    Then the response code is "405"
 
   Scenario: Test Region resource patch with authorised user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
     {
-      "regionName": "Europe updated",
+      "name": "Europe updated",
       "sortOrder": 2,
       "active": false
     }
@@ -117,16 +112,16 @@ Feature: Test Region resources
     And the "Content-Type" request header is "application/merge-patch+json"
     When I request "/api/regions/EUROPE" with HTTP "PATCH"
     Then the response code is "200"
-    And the response key "regionName" is "Europe updated"
+    And the response key "name" is "Europe updated"
     And the response key "sortOrder" is 2
     And the response key "active" is boolean "false"
 
   Scenario Outline: Test Region resource patch with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
-      "regionName": "Europe updated",
+      "name": "Europe updated",
       "sortOrder": 2,
       "active": false
     }
@@ -135,21 +130,18 @@ Feature: Test Region resources
     When I request "/api/regions/EUROPE" with HTTP "PATCH"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+        | user                          | response_code  |
+        | EDITOR_1                     | 403            |
+        | MODERATOR_1                  | 403            |
+        | BLOG_AUTHOR_1                | 403            |
+        | USER_1                       | 403            |
 
   Scenario: Test Region resource patch with unauthenticated user
     Given I am not authenticated
     And the request body is:
     """
     {
-      "regionName": "Europe updated",
+      "name": "Europe updated",
       "sortOrder": 2,
       "active": false
     }
@@ -159,30 +151,33 @@ Feature: Test Region resources
     Then the response code is "401"
 
   Scenario: Test Region resource creation with authorised user
-    Given I am authenticated as "admin2@example.com" with password "Demo1234"
+    Given I am authenticated as "ADMIN_2"
     And the request body is:
     """
-    {
-      "regionCode": "NEW_REGION",
-      "regionName": "New Region",
-      "sortOrder": 10,
-      "active": true
+    {   "id": "NEW_REGION",
+        "name": "New Region",
+        "briefDescription": "Brief description",
+        "shortDescription": "Short description",
+        "longDescription": "Long description",
+        "active": true,
+        "sortOrder": 20
     }
     """
+    And the "Content-Type" request header is "application/ld+json"
     When I request "/api/regions" with HTTP "POST"
     Then the response code is "201"
-    And the response key "regionCode" is "NEW_REGION"
-    And the response key "regionName" is "New Region"
-    And the response key "sortOrder" is 10
+    And the response key "id" is "NEW_REGION"
+    And the response key "name" is "New Region"
+    And the response key "sortOrder" is 20
     And the response key "active" is boolean "true"
 
   Scenario Outline: Test Region resource creation with unauthorised user
-    Given I am authenticated as "<email>" with password "<password>"
+    Given I am authenticated as "<user>"
     And the request body is:
     """
     {
-      "regionCode": "NEW_REGION",
-      "regionName": "New Region",
+      "id": "NEW_REGION",
+      "name": "New Region",
       "sortOrder": 10,
       "active": true
     }
@@ -190,22 +185,19 @@ Feature: Test Region resources
     When I request "/api/regions" with HTTP "POST"
     Then the response code is "<response_code>"
     Examples:
-      | email                         | password  | response_code  |
-      | editor1@example.com           | Demo1234  | 403            |
-      | moderator1@example.com        | Demo1234  | 403            |
-      | blogauthor1@example.com       | Demo1234  | 403            |
-      | finance.director@example.com  | Demo1234  | 403            |
-      | sales.manager1@example.com    | Demo1234  | 403            |
-      | salesperson1@example.com      | Demo1234  | 403            |
-      | user1@example.com             | Demo1234  | 403            |
+      | user                         | response_code  |
+      | EDITOR_1                     | 403            |
+      | MODERATOR_1                  | 403            |
+      | BLOG_AUTHOR_1                | 403            |
+      | USER_1                       | 403            |
 
   Scenario: Test Region resource creation with unauthenticated user
     Given I am not authenticated
     And the request body is:
     """
     {
-      "regionCode": "NEW_REGION",
-      "regionName": "New Region",
+      "id": "NEW_REGION",
+      "name": "New Region",
       "sortOrder": 10,
       "active": true
     }

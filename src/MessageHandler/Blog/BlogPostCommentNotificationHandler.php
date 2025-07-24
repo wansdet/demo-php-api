@@ -56,7 +56,7 @@ final class BlogPostCommentNotificationHandler
 
         $authorName = $author->getName();
         $authorEmail = $author->getEmail();
-        $link = $_ENV['APP_URL'].'/admin/blog/post/comment/'.$blogPostComment->getId().'/manage';
+        $link = $_ENV['FRONTEND_URL'].'/admin/blog/post/comment/'.$blogPostComment->getId().'/manage';
         $template = 'emails/blog_post_comment_status_notification.md';
 
         $email = (new TemplatedEmail())

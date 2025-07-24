@@ -25,14 +25,14 @@ class BlogPostCommentRepository extends ServiceEntityRepository
 
     public function delete(BlogPostComment $blogPostComment): void
     {
-        $this->_em->remove($blogPostComment);
-        $this->_em->flush();
+        $this->getEntityManager()->remove($blogPostComment);
+        $this->getEntityManager()->flush();
     }
 
     public function save(BlogPostComment $blogPostComment): void
     {
-        $this->_em->persist($blogPostComment);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($blogPostComment);
+        $this->getEntityManager()->flush();
     }
 
     //    /**

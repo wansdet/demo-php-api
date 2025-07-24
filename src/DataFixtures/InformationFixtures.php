@@ -28,7 +28,7 @@ class InformationFixtures extends Fixture implements FixtureGroupInterface
             [
                 'informationId' => Uuid::fromString('3c2a5006-4bb7-3f5b-8711-8b111c8da974'),
                 'title' => $faker->sentence(6),
-                'information' => $faker->paragraph(6),
+                'information' => 'Praesentium nam tempore mollitia. ' . $faker->paragraph(5),
                 'informationType' => Information::TYPE_FAQ,
                 'active' => true,
                 'sortOrder' => 1,

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
-use App\Entity\AuthorInterface;
 use App\Entity\UuidInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,7 +23,6 @@ final class UuidSubscriber implements EventSubscriberInterface
 
     public function setUuid(ViewEvent $event): void
     {
-        /** @var AuthorInterface $entity */
         $entity = $event->getControllerResult();
         $method = $event->getRequest()->getMethod();
 

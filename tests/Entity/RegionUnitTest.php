@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  *
- * @coversNothing
+ * @covers \App\Entity\Region
  */
 final class RegionUnitTest extends TestCase
 {
@@ -23,62 +23,93 @@ final class RegionUnitTest extends TestCase
         $this->region = new Region();
     }
 
-    public function testGetAddRemoveCountries(): void
+    public function testSetAndGetId(): void
+    {
+        $this->region->setId('R001');
+        $this->assertSame('R001', $this->region->getId());
+    }
+
+    public function testSetAndGetName(): void
+    {
+        $this->region->setName('Test Region');
+        $this->assertSame('Test Region', $this->region->getName());
+    }
+
+    public function testSetAndGetBriefDescription(): void
+    {
+        $this->region->setBriefDescription('A brief description of the region.');
+        $this->assertSame('A brief description of the region.', $this->region->getBriefDescription());
+    }
+
+    public function testSetAndGetShortDescription(): void
+    {
+        $this->region->setShortDescription('A short description of the region.');
+        $this->assertSame('A short description of the region.', $this->region->getShortDescription());
+    }
+
+    public function testSetAndGetLongDescription(): void
+    {
+        $this->region->setLongDescription('A long description of the region that provides detailed information.');
+        $this->assertSame('A long description of the region that provides detailed information.', $this->region->getLongDescription());
+    }
+
+    public function testSetGetActive(): void
+    {
+        $this->region->setActive(true);
+        $this->assertTrue($this->region->isActive());
+    }
+
+    public function testSetGetSortOrder(): void
+    {
+        $this->region->setSortOrder(1);
+        $this->assertSame(1, $this->region->getSortOrder());
+    }
+
+    public function testSetGetCreatedBy(): void
+    {
+        $createdBy = 'user5';
+        $this->region->setCreatedBy($createdBy);
+        $this->assertSame($createdBy, $this->region->getCreatedBy());
+    }
+
+    public function testSetGetCreatedAt(): void
+    {
+        $createdAt = new \DateTimeImmutable();
+        $this->region->setCreatedAt($createdAt);
+        $this->assertSame($createdAt, $this->region->getCreatedAt());
+    }
+
+    public function testSetGetUpdatedBy(): void
+    {
+        $updatedBy = 'user6';
+        $this->region->setUpdatedBy($updatedBy);
+        $this->assertSame($updatedBy, $this->region->getUpdatedBy());
+    }
+
+    public function testSetGetUpdatedAt(): void
+    {
+        $updatedAt = new \DateTimeImmutable();
+        $this->region->setUpdatedAt($updatedAt);
+        $this->assertSame($updatedAt, $this->region->getUpdatedAt());
+    }
+
+    public function testAddRemoveGetCountries(): void
     {
         $country = new Country();
-        $country->setCountryCode('GB');
-        $country->setCountryName('United Kingdom');
-        $country->setSortOrder(6);
-        $country->setCreatedBy('admin');
-        $country->setUpdatedBy('admin');
 
         $this->region->addCountry($country);
-        self::assertInstanceOf(ArrayCollection::class, $this->region->getCountries());
-        self::assertEquals(1, $this->region->getCountries()->count());
+        $this->assertCount(1, $this->region->getCountries());
+        $this->assertSame($this->region, $country->getRegion());
+        $this->assertTrue($this->region->getCountries()->contains($country));
 
         $this->region->removeCountry($country);
-        self::assertEquals(0, $this->region->getCountries()->count());
+        $this->assertCount(0, $this->region->getCountries());
+        $this->assertNull($country->getRegion());
     }
 
-    public function testGetSetActive(): void
+    public function testGetCountriesInitializesAsEmptyCollection(): void
     {
-        $active = true;
-        $this->region->setActive($active);
-        self::assertEquals($active, $this->region->isActive());
-    }
-
-    public function testGetSetCreatedBy(): void
-    {
-        $createdBy = 'admin';
-        $this->region->setCreatedBy($createdBy);
-        self::assertEquals($createdBy, $this->region->getCreatedBy());
-    }
-
-    public function testGetSetRegionCode(): void
-    {
-        $regionCode = 'EUROPE';
-        $this->region->setRegionCode($regionCode);
-        self::assertEquals($regionCode, $this->region->getRegionCode());
-    }
-
-    public function testGetSetRegionName(): void
-    {
-        $regionName = 'Europe';
-        $this->region->setRegionName($regionName);
-        self::assertEquals($regionName, $this->region->getRegionName());
-    }
-
-    public function testGetSetSortOrder(): void
-    {
-        $sortOrder = 6;
-        $this->region->setSortOrder($sortOrder);
-        self::assertEquals($sortOrder, $this->region->getSortOrder());
-    }
-
-    public function testGetSetUpdatedBy(): void
-    {
-        $updatedBy = 'admin';
-        $this->region->setUpdatedBy($updatedBy);
-        self::assertEquals($updatedBy, $this->region->getUpdatedBy());
+        $this->assertInstanceOf(ArrayCollection::class, $this->region->getCountries());
+        $this->assertCount(0, $this->region->getCountries());
     }
 }

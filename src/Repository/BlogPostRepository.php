@@ -26,8 +26,8 @@ class BlogPostRepository extends ServiceEntityRepository
 
     public function delete(BlogPost $blogPost): void
     {
-        $this->_em->remove($blogPost);
-        $this->_em->flush();
+        $this->getEntityManager()->remove($blogPost);
+        $this->getEntityManager()->flush();
     }
 
     /**
@@ -36,12 +36,12 @@ class BlogPostRepository extends ServiceEntityRepository
     public function findFeaturedBlogPosts(): array
     {
         return $this->createQueryBuilder('b')
-            ->join('b.blogPostComments', 'c')
+            //->join('b.blogPostComments', 'c')
             ->where('b.status = :status')
-            ->andWhere('c.status = :commentStatus')
+            //->andWhere('c.status = :commentStatus')
             ->andWhere('b.featured IS NOT NULL')
             ->setParameter('status', BlogPost::STATUS_PUBLISHED)
-            ->setParameter('commentStatus', BlogPostComment::STATUS_PUBLISHED)
+            //->setParameter('commentStatus', BlogPostComment::STATUS_PUBLISHED)
             ->orderBy('b.featured', 'ASC')
             ->getQuery()
             ->getResult();
@@ -124,11 +124,11 @@ class BlogPostRepository extends ServiceEntityRepository
     {
         $queryBuilder =
         $this->createQueryBuilder('b')
-            ->join('b.blogPostComments', 'c')
+            //->join('b.blogPostComments', 'c')
             ->where('b.status = :status')
-            ->andWhere('c.status = :commentStatus')
+            //->andWhere('c.status = :commentStatus')
             ->setParameter('status', BlogPost::STATUS_PUBLISHED)
-            ->setParameter('commentStatus', BlogPostComment::STATUS_PUBLISHED)
+            //>setParameter('commentStatus', BlogPostComment::STATUS_PUBLISHED)
             ->orderBy('b.id', 'DESC');
 
         if (!empty($criteria)) {
@@ -143,7 +143,7 @@ class BlogPostRepository extends ServiceEntityRepository
 
     public function save(BlogPost $blogPost): void
     {
-        $this->_em->persist($blogPost);
-        $this->_em->flush();
+        $this->getEntityManager()->persist($blogPost);
+        $this->getEntityManager()->flush();
     }
 }
